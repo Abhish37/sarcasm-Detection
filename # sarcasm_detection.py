@@ -7,13 +7,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 
 # Step 1: Load Dataset
-# Download the dataset from https://www.kaggle.com/datasets/rmisra/news-headlines-dataset-for-sarcasm-detection
+# Download the dataset from: https://www.kaggle.com/datasets/rmisra/news-headlines-dataset-for-sarcasm-detection
 data = pd.read_json(r"d:\Sarcasm\Sarcasm_Headlines_Dataset.json", lines=True)
 X = data['headline']
 y = data['is_sarcastic']
 
 # Step 2: Split into Train/Test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Step 3: TF-IDF Vectorization
 vectorizer = TfidfVectorizer(stop_words='english', max_features=5000)
@@ -34,21 +36,27 @@ print("\nClassification Report:\n", classification_report(y_test, y_pred))
 # Step 7: Test on Sample Inputs
 test_sentences = []
 
-print("Enter sentences for sarcasm detection. Type 'done' when finished:")
+print("\nEnter sentences for sarcasm detection. Type 'done' when finished:")
 
 while True:
     sentence = input("Sentence: ")
     if sentence.lower() == 'done':
         break
-    test_sentences.append(sentence)
+    if sentence.strip():  # ignore empty input
+        test_sentences.append(sentence.strip())
 
-print("\nTest Sentences:")
-for s in test_sentences:
-    print(s)
+if not test_sentences:
+    print("\nNo test sentences provided. Exiting.")
+else:
+    print("\nTest Sentences:")
+    for s in test_sentences:
+        print("-", s)
 
-test_features = vectorizer.transform(test_sentences)
-predictions = model.predict(test_features)
+    # Vectorize test sentences
+    test_features = vectorizer.transform(test_sentences)
+    predictions = model.predict(test_features)
 
-for sentence, pred in zip(test_sentences, predictions):
-    label = "Sarcastic" if pred == 1 else "Not Sarcastic"
-    print(f"{sentence} → {label}")
+    print("\nPredictions:")
+    for sentence, pred in zip(test_sentences, predictions):
+        label = "Sarcastic" if pred == 1 else "Not Sarcastic"
+        print(f"→ {sentence} → {label}")
